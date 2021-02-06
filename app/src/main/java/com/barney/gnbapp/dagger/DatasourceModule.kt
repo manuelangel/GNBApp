@@ -1,7 +1,9 @@
 package com.barney.gnbapp.dagger
 
-import com.barney.gnbapp.data.repository.datasource.ProductsDatasource
-import com.barney.gnbapp.data.repository.datasource.impl.ProductsDSImpl
+import com.barney.gnbapp.data.repository.datasource.ProductsNetworkDS
+import com.barney.gnbapp.data.repository.datasource.RatesNetworkDS
+import com.barney.gnbapp.data.repository.datasource.impl.ProductsNetworkDSImpl
+import com.barney.gnbapp.data.repository.datasource.impl.RatesNetworkDSImpl
 import dagger.Module
 import dagger.Provides
 
@@ -9,5 +11,8 @@ import dagger.Provides
 class DatasourceModule {
 
     @Provides
-    fun provideProductsDS(): ProductsDatasource = ProductsDSImpl()
+    fun provideProductsDS(): ProductsNetworkDS = ProductsNetworkDSImpl()
+
+    @Provides
+    fun provideRatesDS(): RatesNetworkDS = RatesNetworkDSImpl()
 }

@@ -1,5 +1,6 @@
-package com.barney.gnbapp.tools
+package com.barney.gnbapp.data.repository.datasource.tools
 
+import hu.akarnokd.rxjava3.retrofit.RxJava3CallAdapterFactory
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -12,10 +13,10 @@ class GNBAppRetrofit {
 
         private val retrofit: Retrofit = Retrofit
             .Builder()
-            .baseUrl("http://quiet-stone-2094.herokuapp.com/")
+            .baseUrl("https://quiet-stone-2094.herokuapp.com/")
             .client(getHTTPClient())
             .addConverterFactory(GsonConverterFactory.create())
-            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+            .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
             .build()
 
         private fun getHTTPClient(): OkHttpClient {

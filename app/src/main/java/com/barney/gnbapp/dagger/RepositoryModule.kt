@@ -1,8 +1,11 @@
 package com.barney.gnbapp.dagger
 
 import com.barney.gnbapp.data.repository.ProductsRepository
-import com.barney.gnbapp.data.repository.datasource.ProductsDatasource
+import com.barney.gnbapp.data.repository.RatesRepository
+import com.barney.gnbapp.data.repository.datasource.ProductsNetworkDS
+import com.barney.gnbapp.data.repository.datasource.RatesNetworkDS
 import com.barney.gnbapp.data.repository.impl.ProductsRepoImpl
+import com.barney.gnbapp.data.repository.impl.RatesRepoImpl
 import dagger.Module
 import dagger.Provides
 
@@ -10,5 +13,10 @@ import dagger.Provides
 class RepositoryModule {
 
     @Provides
-    fun provideProductsRepository(datasource: ProductsDatasource):ProductsRepository = ProductsRepoImpl(datasource)
+    fun provideProductsRepository(datasource: ProductsNetworkDS): ProductsRepository =
+        ProductsRepoImpl(datasource)
+
+    @Provides
+    fun provideRatesRepository(datasource: RatesNetworkDS): RatesRepository =
+        RatesRepoImpl(datasource)
 }
