@@ -24,6 +24,5 @@ class MainActivity : AppCompatActivity() {
         getGNBAppApplication().component.inject(this)
 
         viewModel = ViewModelProvider(this,daggerViewModelFactory).get(MainViewModel::class.java)
-        val h = 2
     }
 }
