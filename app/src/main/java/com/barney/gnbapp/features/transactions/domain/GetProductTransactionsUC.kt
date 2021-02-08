@@ -6,12 +6,15 @@ import com.barney.gnbapp.data.repository.RatesRepository
 import com.barney.gnbapp.data.repository.entity.ProductTransaction
 import com.barney.gnbapp.data.repository.entity.Rate
 import io.reactivex.rxjava3.core.Single
+import java.math.BigDecimal
 import javax.inject.Inject
 
 class GetProductTransactionsUC @Inject constructor(
     private val productsRepository: ProductsRepository,
     private val ratesRepository: RatesRepository
 ) {
+
+    private val MAIN_CURRENCY: String = "EUR"
 
     fun execute(productCode: String): Single<List<ProductTransaction>> {
         return Single.zip(
@@ -26,25 +29,71 @@ class GetProductTransactionsUC @Inject constructor(
         productTransactions: List<ProductTransaction>,
         rates: List<Rate>
     ): List<ProductTransaction> {
-        val ratesMap = generateRatesMap(rates)
+        val (ratesMap, directConversionsMap) = generateRatesMap(rates)
         productTransactions.forEach {
-            if (it.currencyCode != "EUR") {
-                searchEURConversionPath(it, ratesMap)
+            if (directConversionsMap.containsKey("${it.currencyCode}$MAIN_CURRENCY")) {
+                convertDirectlyAndRoundHalfEven(it, MAIN_CURRENCY, directConversionsMap)
+            } else if (it.currencyCode != MAIN_CURRENCY) {
+                convertIndirectly(it, MAIN_CURRENCY, ratesMap, directConversionsMap)
             }
         }
         return productTransactions
     }
 
-    private fun searchEURConversionPath(
-        productTransaction: ProductTransaction,
-        ratesMap: Map<String, List<String>>
+    private fun convertIndirectly(
+        transaction: ProductTransaction,
+        goalCurrency: String,
+        ratesMap: Map<String, List<String>>,
+        directConversionsMap: Map<String, BigDecimal>
     ) {
-        getPath(mutableListOf("EUR"), productTransaction.currencyCode, ratesMap).let {
+        val path = searchEURConversionPath(transaction.currencyCode, goalCurrency, ratesMap)
+
+        path.forEach { currentCurrency ->
+            if (transaction.currencyCode != currentCurrency) {
+                convertDirectly(transaction, currentCurrency, directConversionsMap)
+            }
+        }
+
+        transaction.apply {
+            amount = amount.setScale(2, BigDecimal.ROUND_HALF_EVEN)
+        }
+    }
+
+    private fun convertDirectlyAndRoundHalfEven(
+        transaction: ProductTransaction,
+        newCurrency: String,
+        directConversionsMap: Map<String, BigDecimal>
+    ) {
+        convertDirectly(transaction, newCurrency, directConversionsMap)
+        transaction.apply {
+            amount = amount.setScale(2, BigDecimal.ROUND_HALF_EVEN)
+        }
+    }
+
+    private fun convertDirectly(
+        transaction: ProductTransaction,
+        newCurrency: String,
+        directConversionsMap: Map<String, BigDecimal>
+    ) {
+        val rate = directConversionsMap["${transaction.currencyCode}$newCurrency"]!!
+        transaction.apply {
+            this.amount = (amount * rate)
+            this.currencyCode = newCurrency
+        }
+    }
+
+    private fun searchEURConversionPath(
+        initialCurrency: String,
+        goalCurrency: String,
+        ratesMap: Map<String, List<String>>
+    ): List<String> {
+        return getPath(mutableListOf(goalCurrency), initialCurrency, ratesMap).let {
             Log.i(
                 "TEST_MANU",
-                "Origin: ${productTransaction.currencyCode} List:" + it.joinToString(separator = "->")
+                "Origin: $initialCurrency List:" + it.joinToString(separator = "->")
             )
-        }
+            it
+        }.asReversed()
     }
 
     private fun getPath(
@@ -73,9 +122,11 @@ class GetProductTransactionsUC @Inject constructor(
         }
     }
 
-    private fun generateRatesMap(rates: List<Rate>): Map<String, List<String>> {
+    private fun generateRatesMap(rates: List<Rate>): Pair<Map<String, List<String>>, Map<String, BigDecimal>> {
         val map = mutableMapOf<String, MutableList<String>>()
+        val directConversions = mutableMapOf<String, BigDecimal>()
         rates.forEach {
+            directConversions["${it.fromCurrency}${it.toCurrency}"] = it.rate
             if (map.containsKey(it.toCurrency)) {
                 if (map[it.toCurrency]!!.contains(it.fromCurrency).not()) {
                     map[it.toCurrency]!!.add(it.fromCurrency)
@@ -87,6 +138,6 @@ class GetProductTransactionsUC @Inject constructor(
             }
         }
 
-        return map
+        return Pair(map, directConversions)
     }
 }

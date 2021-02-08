@@ -4,6 +4,6 @@ import java.math.BigDecimal
 
 data class ProductTransaction(
     val productCode: String,
-    val amount: BigDecimal,
-    val currencyCode: String
+    var amount: BigDecimal,
+    var currencyCode: String
 )
