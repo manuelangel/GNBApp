@@ -5,5 +5,6 @@ import io.reactivex.rxjava3.core.Single
 
 interface ProductsRepository {
 
-    fun getAllProductTransactions() : Single<List<ProductTransaction>>
+    fun getProducts() : Single<List<String>>
+    fun getProductTransactions(productCode: String): Single<List<ProductTransaction>>
 }

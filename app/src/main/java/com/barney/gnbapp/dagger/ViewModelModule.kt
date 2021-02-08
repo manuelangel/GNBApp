@@ -2,7 +2,8 @@ package com.barney.gnbapp.dagger
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.barney.gnbapp.features.navigation.viewmodel.MainViewModel
+import com.barney.gnbapp.features.catalogue.viewmodel.ProductsCatalogueVM
+import com.barney.gnbapp.features.transactions.viewmodel.ProductTransactionsVM
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoMap
@@ -15,6 +16,12 @@ abstract class ViewModelModule {
 
     @Binds
     @IntoMap
-    @ViewModelKey(MainViewModel::class)
-    abstract fun bindMainViewModel(viewModel: MainViewModel): ViewModel
+    @ViewModelKey(ProductsCatalogueVM::class)
+    abstract fun bindProductsCatalogueVM(viewModel: ProductsCatalogueVM): ViewModel
+
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(ProductTransactionsVM::class)
+    abstract fun bindProductTransactionsVM(viewModel: ProductTransactionsVM): ViewModel
 }
