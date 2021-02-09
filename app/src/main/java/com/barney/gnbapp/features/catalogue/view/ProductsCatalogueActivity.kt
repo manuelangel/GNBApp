@@ -2,7 +2,7 @@ package com.barney.gnbapp.features.catalogue.view
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -10,6 +10,7 @@ import com.barney.gnbapp.R
 import com.barney.gnbapp.base.getGNBAppApplication
 import com.barney.gnbapp.dagger.DaggerViewModelFactory
 import com.barney.gnbapp.features.catalogue.view.adapter.ProductsAdapter
+import com.barney.gnbapp.features.catalogue.view.model.ProductCatalogueScreen
 import com.barney.gnbapp.features.catalogue.viewmodel.ProductsCatalogueVM
 import com.barney.gnbapp.features.transactions.view.ProductTransactionsActivity
 import kotlinx.android.synthetic.main.activity_products_catalogue.*
@@ -42,8 +43,8 @@ class ProductsCatalogueActivity : AppCompatActivity() {
     private fun setListeners() {
         adapter.listener = object : ProductsAdapter.OnProductSelectedListener {
             override fun onProductSelected(productCode: String) {
-                //Toast.makeText(this@ProductsCatalogueActivity, "Product code: $productCode", Toast.LENGTH_SHORT).show()
-                val intent = Intent(this@ProductsCatalogueActivity, ProductTransactionsActivity::class.java)
+                val intent =
+                    Intent(this@ProductsCatalogueActivity, ProductTransactionsActivity::class.java)
                         .apply {
                             putExtra(
                                 ProductTransactionsActivity.PRODUCT_CODE_BUNDLE_KEY,
@@ -63,11 +64,38 @@ class ProductsCatalogueActivity : AppCompatActivity() {
     }
 
     private fun setObservers() {
-        viewModel.products.observe(this,
-            { products ->
-                adapter.setData(products)
-                Toast.makeText(this, "Numero de productos: " + products.size, Toast.LENGTH_LONG)
-                    .show()
+        viewModel.screenState.observe(this,
+            { screenState ->
+                onScreenStateChange(screenState)
             })
+    }
+
+    private fun onScreenStateChange(screenState: ProductCatalogueScreen?) {
+        when (screenState) {
+            is ProductCatalogueScreen.Error -> showError(screenState)
+            is ProductCatalogueScreen.Loading -> showLoadingMode()
+            is ProductCatalogueScreen.Result -> showResult(screenState)
+        }
+    }
+
+    private fun showError(screenState: ProductCatalogueScreen.Error) {
+        TODO("Not yet implemented")
+    }
+
+    private fun showLoadingMode() {
+        products_catalogue_loading_progress_bar.visibility = View.VISIBLE
+        products_catalogue_loading_text.visibility = View.VISIBLE
+        products_catalogue_recycler_view.visibility = View.GONE
+    }
+
+    private fun hideLoadingMode() {
+        products_catalogue_loading_progress_bar.visibility = View.GONE
+        products_catalogue_loading_text.visibility = View.GONE
+        products_catalogue_recycler_view.visibility = View.VISIBLE
+    }
+
+    private fun showResult(screenState: ProductCatalogueScreen.Result) {
+        adapter.productList = screenState.productList
+        hideLoadingMode();
     }
 }

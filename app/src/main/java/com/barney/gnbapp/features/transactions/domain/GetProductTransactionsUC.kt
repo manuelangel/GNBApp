@@ -5,6 +5,7 @@ import com.barney.gnbapp.data.repository.ProductsRepository
 import com.barney.gnbapp.data.repository.RatesRepository
 import com.barney.gnbapp.data.repository.entity.ProductTransaction
 import com.barney.gnbapp.data.repository.entity.Rate
+import com.barney.gnbapp.features.transactions.domain.model.TransactionUI
 import io.reactivex.rxjava3.core.Single
 import java.math.BigDecimal
 import javax.inject.Inject
@@ -16,28 +17,34 @@ class GetProductTransactionsUC @Inject constructor(
 
     private val MAIN_CURRENCY: String = "EUR"
 
-    fun execute(productCode: String): Single<List<ProductTransaction>> {
+    fun execute(productCode: String): Single<Pair<List<TransactionUI>,TransactionUI>> {
         return Single.zip(
             productsRepository.getProductTransactions(productCode),
             ratesRepository.getRates(),
-            { productTransactions, rates ->
-                prepareTransactions(productTransactions, rates)
-            })
+            { productTransactions, rates -> prepareTransactions(productTransactions, rates)})
     }
 
     private fun prepareTransactions(
         productTransactions: List<ProductTransaction>,
         rates: List<Rate>
-    ): List<ProductTransaction> {
+    ): Pair<List<TransactionUI>,TransactionUI> {
         val (ratesMap, directConversionsMap) = generateRatesMap(rates)
+        var totalAmount = BigDecimal(0)
+        val transactionUIList = mutableListOf<TransactionUI>()
+
         productTransactions.forEach {
+
             if (directConversionsMap.containsKey("${it.currencyCode}$MAIN_CURRENCY")) {
                 convertDirectlyAndRoundHalfEven(it, MAIN_CURRENCY, directConversionsMap)
             } else if (it.currencyCode != MAIN_CURRENCY) {
                 convertIndirectly(it, MAIN_CURRENCY, ratesMap, directConversionsMap)
             }
+
+            totalAmount += it.amount
+            transactionUIList.add(TransactionUI(it.amount.toString(),it.currencyCode));
         }
-        return productTransactions
+
+        return Pair(transactionUIList,TransactionUI(totalAmount.toString(),MAIN_CURRENCY))
     }
 
     private fun convertIndirectly(

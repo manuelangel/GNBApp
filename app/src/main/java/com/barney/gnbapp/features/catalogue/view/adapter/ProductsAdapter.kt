@@ -9,10 +9,11 @@ import com.barney.gnbapp.features.catalogue.view.adapter.viewholder.ProductVH
 
 class ProductsAdapter : RecyclerView.Adapter<ProductVH>() {
 
-    @LayoutRes
-    private val productLayout = R.layout.compound_product
-
-    private var productList: List<String>? = null
+    var productList: List<String> = mutableListOf()
+    set(value) {
+        field = value
+        notifyDataSetChanged()
+    }
 
     lateinit var listener: OnProductSelectedListener
     private val productListener = object:ProductVH.OnProductClickListener{
@@ -27,15 +28,10 @@ class ProductsAdapter : RecyclerView.Adapter<ProductVH>() {
         }
     }
 
-    fun setData(productList: List<String>) {
-        this.productList = productList
-        notifyDataSetChanged()
-    }
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductVH {
         return LayoutInflater
             .from(parent.context)
-            .inflate(productLayout, parent, false)
+            .inflate(R.layout.compound_product, parent, false)
             .let {
                 ProductVH(it).apply {
                     setOnProductClick(productListener)
@@ -44,11 +40,11 @@ class ProductsAdapter : RecyclerView.Adapter<ProductVH>() {
     }
 
     override fun onBindViewHolder(holder: ProductVH, position: Int) {
-        holder.populate(productList!![position])
+        holder.populate(productList[position])
     }
 
     override fun getItemCount(): Int {
-        return productList?.size ?: 0
+        return productList.size
     }
 
     interface OnProductSelectedListener{
