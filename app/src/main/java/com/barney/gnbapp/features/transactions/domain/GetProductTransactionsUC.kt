@@ -5,9 +5,9 @@ import com.barney.gnbapp.data.repository.RatesRepository
 import com.barney.gnbapp.data.repository.entity.ProductTransaction
 import com.barney.gnbapp.data.repository.entity.Rate
 import com.barney.gnbapp.features.transactions.domain.model.TransactionUI
+import com.barney.gnbapp.tools.AmountFormatter
 import io.reactivex.rxjava3.core.Single
 import java.math.BigDecimal
-import java.text.DecimalFormat
 import javax.inject.Inject
 
 class GetProductTransactionsUC @Inject constructor(
@@ -31,7 +31,6 @@ class GetProductTransactionsUC @Inject constructor(
         val (ratesMap, directConversionsMap) = generateRatesMap(rates)
         var totalAmount = BigDecimal(0)
         val transactionUIList = mutableListOf<TransactionUI>()
-        val amountFormat = DecimalFormat("#,###.00")
 
         productTransactions.forEach {
 
@@ -42,12 +41,20 @@ class GetProductTransactionsUC @Inject constructor(
             }
 
             totalAmount += it.amount
-            transactionUIList.add(TransactionUI(amountFormat.format(it.amount), it.currencyCode));
+            transactionUIList.add(
+                TransactionUI(
+                    AmountFormatter.formatAmountToString(it.amount),
+                    it.currencyCode
+                )
+            )
         }
 
         return Pair(
             transactionUIList,
-            TransactionUI(amountFormat.format(totalAmount), MAIN_CURRENCY)
+            TransactionUI(
+                AmountFormatter.formatAmountToString(totalAmount),
+                MAIN_CURRENCY
+            )
         )
     }
 
@@ -97,9 +104,7 @@ class GetProductTransactionsUC @Inject constructor(
         initialCurrency: String,
         goalCurrency: String,
         ratesMap: Map<String, List<String>>
-    ):
-            List<String> =
-        getPath(mutableListOf(goalCurrency), initialCurrency, ratesMap).asReversed()
+    ): List<String> = getPath(mutableListOf(goalCurrency), initialCurrency, ratesMap).asReversed()
 
     private fun getPath(
         currentPath: MutableList<String>,
@@ -127,22 +132,30 @@ class GetProductTransactionsUC @Inject constructor(
         }
     }
 
+    /**
+     * This method generate 2 different maps.
+     * - Map<String,List<String>> contains a currency code as a key and a list of possible origin currencies as value.
+     * It's a simplified representation of a decision tree rates
+     *
+     * - Map<String,BigDecimal> contains a combination of currency codes for a rate
+     * (ORIGIN_CURRENCY+DESTINY_CURRENCY) as key, and  it's rate as value.
+     */
     private fun generateRatesMap(rates: List<Rate>): Pair<Map<String, List<String>>, Map<String, BigDecimal>> {
-        val map = mutableMapOf<String, MutableList<String>>()
+        val rateOptionMap = mutableMapOf<String, MutableList<String>>()
         val directConversions = mutableMapOf<String, BigDecimal>()
         rates.forEach {
             directConversions["${it.fromCurrency}${it.toCurrency}"] = it.rate
-            if (map.containsKey(it.toCurrency)) {
-                if (map[it.toCurrency]!!.contains(it.fromCurrency).not()) {
-                    map[it.toCurrency]!!.add(it.fromCurrency)
+            if (rateOptionMap.containsKey(it.toCurrency)) {
+                if (rateOptionMap[it.toCurrency]!!.contains(it.fromCurrency).not()) {
+                    rateOptionMap[it.toCurrency]!!.add(it.fromCurrency)
                 }
             } else {
                 mutableListOf(it.fromCurrency).let { mutableList ->
-                    map[it.toCurrency] = mutableList
+                    rateOptionMap[it.toCurrency] = mutableList
                 }
             }
         }
 
-        return Pair(map, directConversions)
+        return Pair(rateOptionMap, directConversions)
     }
 }

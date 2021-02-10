@@ -2,7 +2,7 @@ package com.barney.gnbapp.features.catalogue.view.adapter.viewholder
 
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.compound_product.view.*
+import kotlinx.android.synthetic.main.item_product.view.*
 
 class ProductVH(itemView: View) : RecyclerView.ViewHolder(itemView) {
 

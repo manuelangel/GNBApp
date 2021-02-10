@@ -19,7 +19,7 @@ class TransactionsAdapter : RecyclerView.Adapter<TransactionVH>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TransactionVH {
         return LayoutInflater
             .from(parent.context)
-            .inflate(R.layout.compound_transaction, parent, false)
+            .inflate(R.layout.item_transaction, parent, false)
             .let {
                 TransactionVH(it)
             }

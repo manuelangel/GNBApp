@@ -3,7 +3,7 @@ package com.barney.gnbapp.features.transactions.view.adapter.viewholder
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.barney.gnbapp.features.transactions.domain.model.TransactionUI
-import kotlinx.android.synthetic.main.compound_transaction.view.*
+import kotlinx.android.synthetic.main.item_transaction.view.*
 
 class TransactionVH(itemView: View) : RecyclerView.ViewHolder(itemView) {
 

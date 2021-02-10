@@ -77,9 +77,9 @@ class ProductTransactionsActivity : AppCompatActivity() {
     private fun showErrorMessage() {
         hideLoadingMode()
         AlertDialog.Builder(this).apply {
-            setMessage("Something went wrong. Perhaps GNB sent an error to test this app.")
-            setPositiveButton("Retry") { _, _ -> viewModel.loadProductTransactions(productCode) }
-            setNegativeButton("Close") { _, _ -> onBackPressed() }
+            setMessage(getString(R.string.generic_error_message))
+            setPositiveButton(getString(R.string.generic_error_message_retry_button)) { _, _ -> viewModel.loadProductTransactions(productCode) }
+            setNegativeButton(getString(R.string.generic_error_message_close_button)) { _, _ -> onBackPressed() }
             setCancelable(false)
         }.show()
     }

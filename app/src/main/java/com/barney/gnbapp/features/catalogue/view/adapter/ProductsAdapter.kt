@@ -31,7 +31,7 @@ class ProductsAdapter : RecyclerView.Adapter<ProductVH>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductVH {
         return LayoutInflater
             .from(parent.context)
-            .inflate(R.layout.compound_product, parent, false)
+            .inflate(R.layout.item_product, parent, false)
             .let {
                 ProductVH(it).apply {
                     setOnProductClick(productListener)

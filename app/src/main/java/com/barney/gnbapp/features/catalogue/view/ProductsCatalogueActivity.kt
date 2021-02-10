@@ -16,6 +16,7 @@ import com.barney.gnbapp.features.catalogue.view.adapter.ProductsAdapter
 import com.barney.gnbapp.features.catalogue.view.model.ProductCatalogueScreen
 import com.barney.gnbapp.features.catalogue.viewmodel.ProductsCatalogueVM
 import com.barney.gnbapp.features.transactions.view.ProductTransactionsActivity
+import kotlinx.android.synthetic.main.activity_product_transactions.*
 import kotlinx.android.synthetic.main.activity_products_catalogue.*
 import javax.inject.Inject
 
@@ -39,8 +40,13 @@ class ProductsCatalogueActivity : AppCompatActivity() {
 
         setListeners()
         setObservers()
+        configureToolBar()
         configureRecyclerView()
         viewModel.loadProducts()
+    }
+
+    private fun configureToolBar() {
+        setSupportActionBar(products_catalogue_toolbar)
     }
 
     private fun setListeners() {
@@ -87,9 +93,9 @@ class ProductsCatalogueActivity : AppCompatActivity() {
     private fun showError(screenState: ProductCatalogueScreen.Error) {
         hideLoadingMode()
         AlertDialog.Builder(this).apply {
-            setMessage("Something went wrong. Perhaps GNB sent an error to test this app.")
-            setPositiveButton("Retry") { _, _ -> viewModel.loadProducts() }
-            setNegativeButton("Close") { _, _ -> onBackPressed() }
+            setMessage(getString(R.string.generic_error_message))
+            setPositiveButton(getString(R.string.generic_error_message_retry_button)) { _, _ -> viewModel.loadProducts() }
+            setNegativeButton(getString(R.string.generic_error_message_close_button)) { _, _ -> onBackPressed() }
             setCancelable(false)
         }.show()
     }
