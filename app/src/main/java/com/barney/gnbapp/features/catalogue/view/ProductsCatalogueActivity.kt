@@ -3,8 +3,11 @@ package com.barney.gnbapp.features.catalogue.view
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.barney.gnbapp.R
 import com.barney.gnbapp.base.getGNBAppApplication
@@ -58,6 +61,9 @@ class ProductsCatalogueActivity : AppCompatActivity() {
     }
 
     private fun configureRecyclerView() {
+        val itemDecorator = DividerItemDecoration(this, DividerItemDecoration.VERTICAL)
+        itemDecorator.setDrawable(ContextCompat.getDrawable(this, R.drawable.divider_product_card)!!)
+        products_catalogue_recycler_view.addItemDecoration(itemDecorator)
         products_catalogue_recycler_view.setHasFixedSize(true)
         products_catalogue_recycler_view.layoutManager = LinearLayoutManager(this)
         products_catalogue_recycler_view.adapter = adapter
@@ -79,7 +85,13 @@ class ProductsCatalogueActivity : AppCompatActivity() {
     }
 
     private fun showError(screenState: ProductCatalogueScreen.Error) {
-        TODO("Not yet implemented")
+        hideLoadingMode()
+        AlertDialog.Builder(this).apply {
+            setMessage("Something went wrong. Perhaps GNB sent an error to test this app.")
+            setPositiveButton("Retry") { _, _ -> viewModel.loadProducts() }
+            setNegativeButton("Close") { _, _ -> onBackPressed() }
+            setCancelable(false)
+        }.show()
     }
 
     private fun showLoadingMode() {

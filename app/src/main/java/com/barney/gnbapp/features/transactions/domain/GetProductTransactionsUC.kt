@@ -1,6 +1,5 @@
 package com.barney.gnbapp.features.transactions.domain
 
-import android.util.Log
 import com.barney.gnbapp.data.repository.ProductsRepository
 import com.barney.gnbapp.data.repository.RatesRepository
 import com.barney.gnbapp.data.repository.entity.ProductTransaction
@@ -8,6 +7,7 @@ import com.barney.gnbapp.data.repository.entity.Rate
 import com.barney.gnbapp.features.transactions.domain.model.TransactionUI
 import io.reactivex.rxjava3.core.Single
 import java.math.BigDecimal
+import java.text.DecimalFormat
 import javax.inject.Inject
 
 class GetProductTransactionsUC @Inject constructor(
@@ -17,20 +17,21 @@ class GetProductTransactionsUC @Inject constructor(
 
     private val MAIN_CURRENCY: String = "EUR"
 
-    fun execute(productCode: String): Single<Pair<List<TransactionUI>,TransactionUI>> {
+    fun execute(productCode: String): Single<Pair<List<TransactionUI>, TransactionUI>> {
         return Single.zip(
             productsRepository.getProductTransactions(productCode),
             ratesRepository.getRates(),
-            { productTransactions, rates -> prepareTransactions(productTransactions, rates)})
+            { productTransactions, rates -> prepareTransactions(productTransactions, rates) })
     }
 
     private fun prepareTransactions(
         productTransactions: List<ProductTransaction>,
         rates: List<Rate>
-    ): Pair<List<TransactionUI>,TransactionUI> {
+    ): Pair<List<TransactionUI>, TransactionUI> {
         val (ratesMap, directConversionsMap) = generateRatesMap(rates)
         var totalAmount = BigDecimal(0)
         val transactionUIList = mutableListOf<TransactionUI>()
+        val amountFormat = DecimalFormat("#,###.00")
 
         productTransactions.forEach {
 
@@ -41,10 +42,13 @@ class GetProductTransactionsUC @Inject constructor(
             }
 
             totalAmount += it.amount
-            transactionUIList.add(TransactionUI(it.amount.toString(),it.currencyCode));
+            transactionUIList.add(TransactionUI(amountFormat.format(it.amount), it.currencyCode));
         }
 
-        return Pair(transactionUIList,TransactionUI(totalAmount.toString(),MAIN_CURRENCY))
+        return Pair(
+            transactionUIList,
+            TransactionUI(amountFormat.format(totalAmount), MAIN_CURRENCY)
+        )
     }
 
     private fun convertIndirectly(
@@ -93,15 +97,9 @@ class GetProductTransactionsUC @Inject constructor(
         initialCurrency: String,
         goalCurrency: String,
         ratesMap: Map<String, List<String>>
-    ): List<String> {
-        return getPath(mutableListOf(goalCurrency), initialCurrency, ratesMap).let {
-            Log.i(
-                "TEST_MANU",
-                "Origin: $initialCurrency List:" + it.joinToString(separator = "->")
-            )
-            it
-        }.asReversed()
-    }
+    ):
+            List<String> =
+        getPath(mutableListOf(goalCurrency), initialCurrency, ratesMap).asReversed()
 
     private fun getPath(
         currentPath: MutableList<String>,

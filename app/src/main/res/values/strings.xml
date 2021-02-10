@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">GNBApp</string>
+    <string name="product_transactions_total">Total:</string>
+    <string name="product_transactions_empty_total_amount">------ EUR</string>
+    <string name="product_transactions_loading_text">Loading transactions...</string>
+    <string name="products_catalogue_loading_text">Loading products...</string>
 </resources>

@@ -1,6 +1,5 @@
 package com.barney.gnbapp.features.transactions.view
 
-import android.content.DialogInterface
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AlertDialog
@@ -46,11 +45,11 @@ class ProductTransactionsActivity : AppCompatActivity() {
     }
 
     private fun setObservers() {
-        viewModel.screenState.observe(this, { screenState ->onScreenStateChange(screenState)})
+        viewModel.screenState.observe(this, { screenState -> onScreenStateChange(screenState) })
     }
 
     private fun onScreenStateChange(screenState: ProductTransactionScreen?) {
-        when(screenState){
+        when (screenState) {
             is ProductTransactionScreen.Result -> showResult(screenState)
             is ProductTransactionScreen.Loading -> showLoadingMode()
             is ProductTransactionScreen.Error -> showErrorMessage()
@@ -59,15 +58,16 @@ class ProductTransactionsActivity : AppCompatActivity() {
 
     private fun showResult(result: ProductTransactionScreen.Result) {
         adapter.transactionsList = result.transactionList
-        product_transactions_total_amount.text = result.totalAmount.amount
+        product_transactions_total_amount.text = "${result.totalAmount.amount} ${result.totalAmount.currency}"
         hideLoadingMode()
     }
 
-    private fun hideLoadingMode(){
+    private fun hideLoadingMode() {
         product_transactions_loading_progress_bar.visibility = View.GONE
         product_transactions_loading_text.visibility = View.GONE
         product_transactions_recycler_view.visibility = View.VISIBLE
     }
+
     private fun showLoadingMode() {
         product_transactions_loading_progress_bar.visibility = View.VISIBLE
         product_transactions_loading_text.visibility = View.VISIBLE
@@ -75,18 +75,21 @@ class ProductTransactionsActivity : AppCompatActivity() {
     }
 
     private fun showErrorMessage() {
+        hideLoadingMode()
         AlertDialog.Builder(this).apply {
-            title = "Generic error"
-            setMessage("GNB sent an error to test this app.")
+            setMessage("Something went wrong. Perhaps GNB sent an error to test this app.")
             setPositiveButton("Retry") { _, _ -> viewModel.loadProductTransactions(productCode) }
             setNegativeButton("Close") { _, _ -> onBackPressed() }
+            setCancelable(false)
         }.show()
     }
 
     private fun configureToolBar() {
         setSupportActionBar(product_transactions_toolbar)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.setDisplayShowHomeEnabled(true)
+        supportActionBar?.apply {
+            setDisplayHomeAsUpEnabled(true)
+            setDisplayShowHomeEnabled(true)
+        }
     }
 
     private fun configureRecyclerView() {

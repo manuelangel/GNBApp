@@ -22,7 +22,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".features.transactions.view.ProductTransactionsActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            android:theme="@style/Theme.GNBApp.NoActionBar"
             android:screenOrientation="portrait"/>
     </application>
 
