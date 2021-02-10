@@ -13,7 +13,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.GNBApp">
-        <activity android:name=".features.catalogue.view.ProductsCatalogueActivity"
+        <activity android:name=".features.splash.view.SplashActivity"
             android:theme="@style/Theme.GNBApp.NoActionBar"
             android:screenOrientation="portrait">
             <intent-filter>
@@ -22,6 +22,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".features.catalogue.view.ProductsCatalogueActivity"
+            android:theme="@style/Theme.GNBApp.NoActionBar"
+            android:screenOrientation="portrait"/>
         <activity android:name=".features.transactions.view.ProductTransactionsActivity"
             android:theme="@style/Theme.GNBApp.NoActionBar"
             android:screenOrientation="portrait"/>
